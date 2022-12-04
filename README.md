@@ -6,9 +6,14 @@ Desenvolvido por: Fabricio C. Raszeja, sob orientação de Danilo R. Gomes
 # Pastas:
 node -> arquivos usados pelo node-red
 requer:
+
 node-red-contrib-ui-artless-gauge
+
 node-red-dashboard
+
 node-red-node-ui-table
+
+utilize o tema "dark" do node-red-dashboard para visualização correta dos elementos.
 
 py -> arquivos do dispositivo
 
