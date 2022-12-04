@@ -5,7 +5,10 @@ Desenvolvido por: Fabricio C. Raszeja, sob orientação de Danilo R. Gomes
 
 # Pastas:
 node -> arquivos usados pelo node-red
-lista de requerimentos a ser detalhada em breve
+requer:
+node-red-contrib-ui-artless-gauge
+node-red-dashboard
+node-red-node-ui-table
 
 py -> arquivos do dispositivo
 
