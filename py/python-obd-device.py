@@ -77,17 +77,18 @@ class freeze_frame:
     
 # Para criar o cliente mqtt:
 # hostname, porta, topico, client_id, usuario, senha
-cliente_mqtt = mqtt_handle("XXXXXX", 1883, "XXXXXX/XXXXXX", "XXXXXX", "XXXXXX", "XXXXXX")
+cliente_mqtt = mqtt_handle("XXXXXXXXXXX", 1883, "XXXX/XXXXX", "XXXXXXXXXXX", "XXXXXXXXXXX", "XXXXXXXXXXX")
 cliente_mqtt.connect()
 
 #porta OBD
-porta = "XXXXXX"
+porta = "XXXXXXXXXXX"
 con = obd.OBD(porta)
 while True:
     print(con.status())
     if con.status() == OBDStatus.CAR_CONNECTED:
         data = dados()
         print("Coletando dados...")
+        
         try:
             rpm = con.query(obd.commands.RPM)
             speed = con.query(obd.commands.SPEED)
@@ -102,25 +103,29 @@ while True:
             continue
         
         if not rpm.is_null():
-            dados.RPM = rpm.value.magnitude
-            
+            data.RPM = rpm.value.magnitude
+        else:
+            con.close()
+            con = obd.OBD(porta)
+            continue
+        
         if not speed.is_null():
-            dados.VELOCIDADE = speed.value.magnitude
+            data.VELOCIDADE = speed.value.magnitude
 
         if not pedal.is_null():
-            dados.PEDAL_ACELERADOR = pedal.value.magnitude
+            data.PEDAL_ACELERADOR = pedal.value.magnitude
 
         if not trouble.is_null():
-            dados.MIL = trouble.value.MIL
+            data.MIL = trouble.value.MIL
 
         if not coolant.is_null():
-            dados.TEMPERATURA_ARREFECIMENTO = coolant.value.magnitude
+            data.TEMPERATURA_ARREFECIMENTO = coolant.value.magnitude
 
         if not intake.is_null():
-            dados.TEMPERATURA_INTAKE = intake.value.magnitude
+            data.TEMPERATURA_INTAKE = intake.value.magnitude
 
         
-        if dados.MIL == True:
+        if data.MIL == True:
             frame = freeze_frame()
             try:
                 errors = con.query(obd.commands.GET_DTC)
@@ -138,22 +143,24 @@ while True:
                     frame.TEMPERATURA_INTAKE = errors.value.magnitude
                     errors = con.query(obd.commands.DTC_COOLANT_TEMP)
                     frame.TEMPERATURA_ARREFECIMENTO = errors.value.magnitude
-                    dados.FREEZE_FRAME = frame
+                    data.FREEZE_FRAME = frame
             except:
                 print("FAIL RECV DATA")
                 con.close()
                 con = obd.OBD(porta)
                 continue
 
-        dados.timestamp = int(time.time())
+        data.timestamp = int(time.time())
+        
         try:
-            cliente_mqtt.publish(dados.toJson)
+            cliente_mqtt.publish(data.toJson())
         except:
             print("FAIL SEND")
     else:
             print("FAIL CONNECT CAR")
             con.close()
             con = obd.OBD(porta)
+    time.sleep(2)
 con.close()
 
 
